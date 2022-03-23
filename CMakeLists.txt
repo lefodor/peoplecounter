@@ -15,5 +15,16 @@ if(${OPENCV_FOUND})
     MESSAGE(${OPENCV_LINK_LIBRARIES})
 endif()
 
-add_executable(${PROJECT_NAME} main.cpp)
-target_link_libraries(peoplecounter ${OpenCV_LIBS})
+include_directories( ${OpenCV_INCLUDE_DIRS} )
+
+#add_library(build "")
+
+# add the colorHSVtrackbar library
+#add_subdirectory(colorHSVtrackbar)
+
+add_executable(${PROJECT_NAME} main.cpp colorHSVtrackbar.cpp thresholding.cpp)
+target_link_libraries(peoplecounter PUBLIC ${OpenCV_LIBS})
+target_include_directories(peoplecounter PUBLIC 
+                            "${PROJECT_BINARY_DIR}" 
+                            #"${PROJECT_SOURCE_DIR}/colorHSVtrackbar"
+                            )

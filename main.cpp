@@ -5,6 +5,9 @@
 #include <opencv2/highgui.hpp>
 #include <opencv2/imgproc.hpp>
 
+#include "colorHSVtrackbar.h"
+#include "thresholding.h"
+
 //using namespace cv;
 
 int main(int argc, char** argv )
@@ -30,11 +33,25 @@ int main(int argc, char** argv )
     cv::destroyAllWindows(); //Destroy all opened windows
 */
 
+	// set up global vars ------------------------------------------------------------------
+	// starting values for trackbar
+	int iLowH = 22;
+	int iHighH = 38;
+
+	int iLowS = 80;
+	int iHighS = 150;
+
+	int iLowV = 60;
+	int iHighV = 255;
+
+	int iLastX = -1;
+	int iLastY = -1;
+
 	// image processing variables
 	cv::Mat imgHSV  ;      // HSV convert
-	cv::Mat imgLines;      // empty image + tracking lines from colored object
-	//cv::Mat imgGr   ;    // grayscale image
-	cv::Mat imgdraw ;
+	//cv::Mat imgLines;      // empty image + tracking lines from colored object
+	cv::Mat imgGray   ;    // grayscale image
+	//cv::Mat imgdraw ;
 	cv::VideoCapture cap(0);
 
 	//Define names of the window
@@ -54,10 +71,12 @@ int main(int argc, char** argv )
     if ( cap.isOpened() == true )
 	{
 		std::cout << "Video is open " << std::endl;
+		std::cout << "Press ESC to end... " << std::endl;
 	}
 
     // Capture a temporary image from the camera
 	cv::Mat imgTmp;
+	cap.read(imgTmp);
 	if ( cap.read(imgTmp) == false ) {
         std::cout << "No frame captured" << std::endl ;
         cv::waitKey() ;
@@ -65,10 +84,10 @@ int main(int argc, char** argv )
     };
 
 	// Create a black image with the size as the camera output
-	imgLines = cv::Mat::zeros(imgTmp.size(), CV_8UC3);
+	//imgLines = cv::Mat::zeros(imgTmp.size(), CV_8UC3);
 
 	// setup trackbar - used for manual calibration ----------------------------------------
-	//colorhsvtrackbar(win_control,iLowH, iHighH, iLowS, iHighS, iLowV, iHighV);
+	colorHSVtrackbar(win_control, iLowH, iHighH, iLowS, iHighS, iLowV, iHighV);
 
 	// start frame -------------------------------------------------------------------------
 	unsigned int fcnt = 0; // frame counter: used to send data to arduino at every nth frame
@@ -85,10 +104,23 @@ int main(int argc, char** argv )
 			break;
 		}
 
+		// create HSV image
+		cv::cvtColor(imgOriginal, imgHSV, cv::COLOR_BGR2HSV); //Convert the captured frame from BGR to HSV
+
+		// create image with thresholding method v1
+		cv::Mat imgThres = thresholdingv1(imgHSV, iLowH, iHighH, iLowS, iHighS, iLowV, iHighV);
+
+		// create grayscale image
+		cv::cvtColor(imgOriginal, imgGray, cv::COLOR_BGR2GRAY);
+
 		// show video with tracking line
 		cv::imshow("Original", imgOriginal); //show the original image
 
-		//-------- Send the position to Arduino -----------------------------------------------
+		// show thresholded image
+		cv::imshow("Thresholded Image", imgThres); //show the thresholded image
+
+		// show grayscale image
+		cv::imshow("Grayscale Image", imgGray); //show the thresholded image
 
 		// exit -------------------------------------------------------------------------------
 		int comm = cv::waitKey(10);
