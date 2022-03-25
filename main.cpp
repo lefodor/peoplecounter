@@ -44,9 +44,6 @@ int main(int argc, char** argv )
 	int iLowV = 60;
 	int iHighV = 255;
 
-	int iLastX = -1;
-	int iLastY = -1;
-
 	// image processing variables
 	cv::Mat imgHSV  ;      // HSV convert
 	//cv::Mat imgLines;      // empty image + tracking lines from colored object
@@ -60,7 +57,7 @@ int main(int argc, char** argv )
 
 	// Create a window with above names
 	cv::namedWindow(win_control, cv::WINDOW_AUTOSIZE);
-	cv::namedWindow(win_orig, cv::WINDOW_AUTOSIZE);
+	//cv::namedWindow(win_orig, cv::WINDOW_AUTOSIZE);
 
 	if ( cap.isOpened() == false )
 	{
@@ -107,14 +104,21 @@ int main(int argc, char** argv )
 		// create HSV image
 		cv::cvtColor(imgOriginal, imgHSV, cv::COLOR_BGR2HSV); //Convert the captured frame from BGR to HSV
 
-		// create image with thresholding method v1
-		cv::Mat imgThres = thresholdingv1(imgHSV, iLowH, iHighH, iLowS, iHighS, iLowV, iHighV);
-
 		// create grayscale image
 		cv::cvtColor(imgOriginal, imgGray, cv::COLOR_BGR2GRAY);
 
+		//cv::Mat imgGray_histeq ;
+		equalizeHist(imgGray, imgGray);
+
+		//cv::Mat imgGray_erode ;
+		//cv::erode(imgGray, imgGray_erode, cv::getStructuringElement(cv::MORPH_RECT, cv::Size(3, 3)));
+
+		// create image with thresholding method v1
+		cv::Mat imgThres = thresholdingv1(imgHSV, iLowH, iHighH, iLowS, iHighS, iLowV, iHighV);
+		//cv::Mat imgThresv3 = thresholdingv3(imgHSV, iLowH, iHighH, iLowS, iHighS, iLowV, iHighV);
+
 		// show video with tracking line
-		cv::imshow("Original", imgOriginal); //show the original image
+		//cv::imshow("Original", imgOriginal); //show the original image
 
 		// show thresholded image
 		cv::imshow("Thresholded Image", imgThres); //show the thresholded image
