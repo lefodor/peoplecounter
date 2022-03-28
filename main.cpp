@@ -7,6 +7,7 @@
 
 #include "colorHSVtrackbar.h"
 #include "thresholding.h"
+#include "detectObjects.h"
 
 //using namespace cv;
 
@@ -48,7 +49,6 @@ int main(int argc, char** argv )
 	cv::Mat imgHSV  ;      // HSV convert
 	//cv::Mat imgLines;      // empty image + tracking lines from colored object
 	cv::Mat imgGray   ;    // grayscale image
-	//cv::Mat imgdraw ;
 	cv::VideoCapture cap(0);
 
 	//Define names of the window
@@ -120,8 +120,12 @@ int main(int argc, char** argv )
 		// show video with tracking line
 		//cv::imshow("Original", imgOriginal); //show the original image
 
+		// object detection
+		cv::Mat imgDetect;
+		detectObjects(imgOriginal, imgGray, imgDetect);
+
 		// show thresholded image
-		cv::imshow("Thresholded Image", imgThres); //show the thresholded image
+		cv::imshow("Thresholded Image", imgDetect); //show the thresholded image
 
 		// show grayscale image
 		cv::imshow("Grayscale Image", imgGray); //show the thresholded image
