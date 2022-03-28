@@ -22,7 +22,7 @@ include_directories( ${OpenCV_INCLUDE_DIRS} )
 # add the colorHSVtrackbar library
 #add_subdirectory(colorHSVtrackbar)
 
-add_executable(${PROJECT_NAME} main.cpp colorHSVtrackbar.cpp thresholding.cpp)
+add_executable(${PROJECT_NAME} main.cpp colorHSVtrackbar.cpp thresholding.cpp detectObjects.cpp)
 target_link_libraries(peoplecounter PUBLIC ${OpenCV_LIBS})
 target_include_directories(peoplecounter PUBLIC 
                             "${PROJECT_BINARY_DIR}" 

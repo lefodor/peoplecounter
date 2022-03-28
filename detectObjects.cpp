@@ -20,7 +20,8 @@ void detectObjects(cv::Mat& imgorig, cv::Mat& imgthres, cv::Mat& imgdetect){
 		imgthres, 
 		contoursimg, 
 		hierarchy, 
-		cv::RETR_CCOMP, 
+		//cv::RETR_CCOMP, 
+		cv::RETR_TREE,
 		cv::CHAIN_APPROX_SIMPLE);
 /*	hull.resize(contours.size());
 
@@ -55,20 +56,20 @@ void detectObjects(cv::Mat& imgorig, cv::Mat& imgthres, cv::Mat& imgdetect){
         cv::approxPolyDP(
 			cv::Mat(contoursimg[k]), 
 			countoursoutp[k], 
-			10, 
+			5, 
 			true);
 	}
 
     // draw contours
-	imgdetect = cv::Mat::zeros(imgthres.size(), CV_8UC1);
+	imgdetect = cv::Mat::zeros(imgthres.size(), CV_8UC3);
 	cv::drawContours(
 		imgdetect, 
 		countoursoutp, 
 		-1, 
-		cv::Scalar(255, 0, 0), 
-		2, 
-		cv::LINE_8, 
+		cv::Scalar(128, 255, 255), 
+		3, 
+		cv::LINE_AA, 
 		hierarchy, 
-		0);
+		1);
 
 }
