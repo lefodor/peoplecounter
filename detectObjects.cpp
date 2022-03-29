@@ -1,75 +1,27 @@
 #include <vector>
 #include "detectObjects.h"
 
-void detectObjects(cv::Mat& imgorig, cv::Mat& imgthres, cv::Mat& imgdetect){
-	/*
-	std::vector<std::vector<cv::Point>> contoursimg; // detected contours
-	std::vector<std::vector<cv::Point>> hull;
-	std::vector<std::vector<cv::Point>> countoursres; // 
-	std::vector<cv::Vec4i> hierarchy;
-	*/
+void detectObjects(cv::Mat& imgorig, cv::Mat& imgthres, std::vector<cv::Vec4i>& hierarchy, std::vector<std::vector<cv::Point>>& contoursOut){
 
-	std::vector<std::vector<cv::Point>> contoursimg ;
-	std::vector<cv::Vec4i> hierarchy ;
-	std::vector<std::vector<cv::Point>> countoursoutp ;
+	std::vector<std::vector<cv::Point>> contoursImg ;
 
 	// create binary from grayscale
 	cv::threshold(imgthres, imgthres,128,255, cv::THRESH_BINARY);
 
 	cv::findContours(
 		imgthres, 
-		contoursimg, 
+		contoursImg, 
 		hierarchy, 
 		//cv::RETR_CCOMP, 
 		cv::RETR_TREE,
-		cv::CHAIN_APPROX_SIMPLE);
-/*	hull.resize(contours.size());
+		cv::CHAIN_APPROX_SIMPLE );
 
-	std::vector<cv::Point> approxhull;
-	// approximates each contour to polygon
-	for (std::vector<cv::Point>cont : contours) {
-
-		// create contours
-		cv::convexHull(cv::Mat(cont), approxhull);
-		cv::approxPolyDP(approxhull, approxhull, cv::arcLength(approxhull, true) * 0.02, true);
-
-		// keep only circles
-		//if (approxhull.size() > 10
-		//	&& fabs(cv::contourArea(approxhull)) > 10
-		//	) {
-			circles.push_back(approxhull);
-		//}
-		
-	}
-	*/
-
-	/*
-	for (std::vector<cv::Point>cont : contoursimg) {
-		// detect polygons
-		countoursres = ;
-
-	}
-	*/
-
-	countoursoutp.resize(contoursimg.size()) ;
-	for( size_t k = 0; k < contoursimg.size(); k++ ) {
+	contoursOut.resize(contoursImg.size()) ;
+	for( size_t k = 0; k < contoursImg.size(); k++ ) {
         cv::approxPolyDP(
-			cv::Mat(contoursimg[k]), 
-			countoursoutp[k], 
+			cv::Mat(contoursImg[k]), 
+			contoursOut[k], 
 			5, 
 			true);
 	}
-
-    // draw contours
-	imgdetect = cv::Mat::zeros(imgthres.size(), CV_8UC3);
-	cv::drawContours(
-		imgdetect, 
-		countoursoutp, 
-		-1, 
-		cv::Scalar(128, 255, 255), 
-		3, 
-		cv::LINE_AA, 
-		hierarchy, 
-		1);
-
 }

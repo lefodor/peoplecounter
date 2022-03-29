@@ -4,6 +4,7 @@
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/highgui.hpp>
 #include <opencv2/imgproc.hpp>
+#include <opencv2/objdetect.hpp>
 
 #include "colorHSVtrackbar.h"
 #include "thresholding.h"
@@ -11,53 +12,44 @@
 
 //using namespace cv;
 
+// set up global vars ------------------------------------------------------------------
+// --- trackbar
+const int w = 500;
+int levels = 4;
+int iLowH = 22;
+int iHighH = 38;
+
+int iLowS = 80;
+int iHighS = 150;
+
+int iLowV = 60;
+int iHighV = 255;
+
+// --- object detection
+std::vector<cv::Vec4i> hierarchy ;
+std::vector<std::vector<cv::Point>> contoursOut ;
+
+
+static void on_trackbar(int, cv::Mat& cnt_img, void*)
+{
+    int _levels = levels - 3;
+    drawContours( 
+		cnt_img, 
+		contoursOut, 
+		_levels <= 0 ? 3 : -1, 
+		cv::Scalar(128,255,255),
+        3, cv::LINE_AA, hierarchy, std::abs(_levels) );
+}
+
+
 int main(int argc, char** argv )
 {
-/*
-    if ( argc != 2 )
-    {
-        printf("usage: DisplayImage.out <image path>\n");
-        return -1;
-    }
-    
-    cv::Mat image;
-    image = cv::imread( argv[1], 1 );
-    if ( !image.data )
-    {
-        printf("No image data \n");
-        return -1;
-    }
-
-    cv::namedWindow("Display Image", cv::WINDOW_AUTOSIZE );
-    cv::imshow("Display Image", image);
-    cv::waitKey(0);
-    cv::destroyAllWindows(); //Destroy all opened windows
-*/
-
-	// set up global vars ------------------------------------------------------------------
-	// starting values for trackbar
-	int iLowH = 22;
-	int iHighH = 38;
-
-	int iLowS = 80;
-	int iHighS = 150;
-
-	int iLowV = 60;
-	int iHighV = 255;
 
 	// image processing variables
 	cv::Mat imgHSV  ;      // HSV convert
 	//cv::Mat imgLines;      // empty image + tracking lines from colored object
 	cv::Mat imgGray   ;    // grayscale image
 	cv::VideoCapture cap(0);
-
-	//Define names of the window
-	cv::String win_control = "Control";
-	cv::String win_orig = "Original";
-
-	// Create a window with above names
-	cv::namedWindow(win_control, cv::WINDOW_AUTOSIZE);
-	//cv::namedWindow(win_orig, cv::WINDOW_AUTOSIZE);
 
 	if ( cap.isOpened() == false )
 	{
@@ -80,14 +72,21 @@ int main(int argc, char** argv )
         return -1 ;
     };
 
-	// Create a black image with the size as the camera output
-	//imgLines = cv::Mat::zeros(imgTmp.size(), CV_8UC3);
-
 	// setup trackbar - used for manual calibration ----------------------------------------
-	colorHSVtrackbar(win_control, iLowH, iHighH, iLowS, iHighS, iLowV, iHighV);
+	// Create trackbars in "Control" window
+	cv::namedWindow( "contours", 1 );
+	cv::createTrackbar("Levels", "contours", &levels, 7) ; // levels
+
+	cv::createTrackbar("LowH", "contours", &iLowH, 179) ; // Hue (0 - 179)
+	cv::createTrackbar("HighH", "contours", &iHighH, 179);
+
+	cv::createTrackbar("LowS", "contours", &iLowS, 255); // Saturation (0 - 255)
+	cv::createTrackbar("HighS", "contours", &iHighS, 255);
+
+	cv::createTrackbar("LowV", "contours", &iLowV, 255); // Value (0 - 255)
+	cv::createTrackbar("HighV", "contours", &iHighV, 255);
 
 	// start frame -------------------------------------------------------------------------
-	unsigned int fcnt = 0; // frame counter: used to send data to arduino at every nth frame
 	while ( true ) {
 
 		// get video
@@ -110,30 +109,27 @@ int main(int argc, char** argv )
 		//cv::Mat imgGray_histeq ;
 		equalizeHist(imgGray, imgGray);
 
-		//cv::Mat imgGray_erode ;
-		//cv::erode(imgGray, imgGray_erode, cv::getStructuringElement(cv::MORPH_RECT, cv::Size(3, 3)));
-
 		// create image with thresholding method v1
-		cv::Mat imgThres = thresholdingv1(imgHSV, iLowH, iHighH, iLowS, iHighS, iLowV, iHighV);
+		//cv::Mat imgThres = thresholdingv1(imgHSV, iLowH, iHighH, iLowS, iHighS, iLowV, iHighV);
 		//cv::Mat imgThresv3 = thresholdingv3(imgHSV, iLowH, iHighH, iLowS, iHighS, iLowV, iHighV);
 
 		// show video with tracking line
 		//cv::imshow("Original", imgOriginal); //show the original image
 
-		// object detection
-		cv::Mat imgDetect;
-		detectObjects(imgOriginal, imgGray, imgDetect);
-
+		// Object detection
+		cv::Mat imgDetect = cv::Mat::zeros(w, w, CV_8UC3);
+		detectObjects(
+			imgOriginal, imgGray, hierarchy, contoursOut);
+		
+		on_trackbar(0,imgDetect,0);
 		// show thresholded image
-		cv::imshow("Thresholded Image", imgDetect); //show the thresholded image
+		cv::imshow("Detected Image", imgDetect); //show the thresholded image
 
 		// show grayscale image
 		cv::imshow("Grayscale Image", imgGray); //show the thresholded image
 
 		// exit -------------------------------------------------------------------------------
 		int comm = cv::waitKey(10);
-
-		fcnt++;
 
 		// exit -------------------------------------------------------------------------------
 		if ( comm == 27 ) {
