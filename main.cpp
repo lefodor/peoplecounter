@@ -63,15 +63,6 @@ int main(int argc, char** argv )
 		std::cout << "Press ESC to end... " << std::endl;
 	}
 
-    // Capture a temporary image from the camera
-	cv::Mat imgTmp;
-	cap.read(imgTmp);
-	if ( cap.read(imgTmp) == false ) {
-        std::cout << "No frame captured" << std::endl ;
-        cv::waitKey() ;
-        return -1 ;
-    };
-
 	// setup trackbar - used for manual calibration ----------------------------------------
 	// Create trackbars in "Control" window
 	cv::namedWindow( "contours", 1 );
