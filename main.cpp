@@ -5,6 +5,7 @@
 #include <opencv2/highgui.hpp>
 #include <opencv2/imgproc.hpp>
 #include <opencv2/objdetect.hpp>
+#include <opencv2/xobjdetect.hpp>
 
 #include "colorHSVtrackbar.h"
 #include "thresholding.h"
@@ -38,7 +39,7 @@ static void on_trackbar(int, cv::Mat& cnt_img, void*)
 		contoursOut, 
 		_levels <= 0 ? 3 : -1, 
 		cv::Scalar(128,255,255),
-        3, cv::LINE_AA, hierarchy, std::abs(_levels) );
+        1, cv::LINE_AA, hierarchy, std::abs(_levels) );
 }
 
 
@@ -65,9 +66,10 @@ int main(int argc, char** argv )
 
 	// setup trackbar - used for manual calibration ----------------------------------------
 	// Create trackbars in "Control" window
-	cv::namedWindow( "contours", 1 );
-	cv::createTrackbar("Levels", "contours", &levels, 7) ; // levels
+	cv::namedWindow( "contours", cv::WINDOW_AUTOSIZE );
+	cv::createTrackbar("Levels", "contours", &levels, 12) ; // levels
 
+	/*
 	cv::createTrackbar("LowH", "contours", &iLowH, 179) ; // Hue (0 - 179)
 	cv::createTrackbar("HighH", "contours", &iHighH, 179);
 
@@ -76,6 +78,7 @@ int main(int argc, char** argv )
 
 	cv::createTrackbar("LowV", "contours", &iLowV, 255); // Value (0 - 255)
 	cv::createTrackbar("HighV", "contours", &iHighV, 255);
+	*/
 
 	// start frame -------------------------------------------------------------------------
 	while ( true ) {
@@ -113,11 +116,12 @@ int main(int argc, char** argv )
 			imgOriginal, imgGray, hierarchy, contoursOut);
 		
 		on_trackbar(0,imgDetect,0);
+		
 		// show thresholded image
 		cv::imshow("Detected Image", imgDetect); //show the thresholded image
 
 		// show grayscale image
-		cv::imshow("Grayscale Image", imgGray); //show the thresholded image
+		//cv::imshow("Grayscale Image", imgGray); //show the thresholded image
 
 		// exit -------------------------------------------------------------------------------
 		int comm = cv::waitKey(10);
