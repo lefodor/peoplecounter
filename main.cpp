@@ -67,7 +67,7 @@ int main(int argc, char** argv )
 	// setup trackbar - used for manual calibration ----------------------------------------
 	// Create trackbars in "Control" window
 	cv::namedWindow( "contours", cv::WINDOW_AUTOSIZE );
-	cv::createTrackbar("Levels", "contours", &levels, 12) ; // levels
+	cv::createTrackbar("Levels", "contours", &levels, 7); // levels
 
 	/*
 	cv::createTrackbar("LowH", "contours", &iLowH, 179) ; // Hue (0 - 179)
