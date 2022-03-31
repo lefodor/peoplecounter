@@ -17,6 +17,9 @@
 // --- trackbar
 const int w = 500;
 int levels = 4;
+int adaptThresBlock = 5 ;
+int adaptThresConst = 12 ;
+
 int iLowH = 22;
 int iHighH = 38;
 
@@ -34,6 +37,15 @@ std::vector<std::vector<cv::Point>> contoursOut ;
 static void on_trackbar(int, cv::Mat& cnt_img, void*)
 {
     int _levels = levels - 3;
+
+	adaptThresBlock = adaptThresBlock<3 ? 3 : adaptThresBlock ;
+
+	if( adaptThresBlock>3 && adaptThresBlock%2!=1 ){
+		adaptThresBlock-- ;
+	}
+
+	//int _adaptThresConst = adaptThresConst ;
+
     drawContours( 
 		cnt_img, 
 		contoursOut, 
@@ -47,7 +59,7 @@ int main(int argc, char** argv )
 {
 
 	// image processing variables
-	cv::Mat imgHSV  ;      // HSV convert
+	//cv::Mat imgHSV  ;      // HSV convert
 	//cv::Mat imgLines;      // empty image + tracking lines from colored object
 	cv::Mat imgGray   ;    // grayscale image
 	cv::VideoCapture cap(0);
@@ -68,6 +80,8 @@ int main(int argc, char** argv )
 	// Create trackbars in "Control" window
 	cv::namedWindow( "contours", cv::WINDOW_AUTOSIZE );
 	cv::createTrackbar("Levels", "contours", &levels, 7); // levels
+	cv::createTrackbar("Threshold_Block", "contours", &adaptThresBlock, 11); // adaptive threshold blocksize
+	cv::createTrackbar("Threshold_Const", "contours", &adaptThresConst, 12); // adaptive threshold constant
 
 	/*
 	cv::createTrackbar("LowH", "contours", &iLowH, 179) ; // Hue (0 - 179)
@@ -95,7 +109,7 @@ int main(int argc, char** argv )
 		}
 
 		// create HSV image
-		cv::cvtColor(imgOriginal, imgHSV, cv::COLOR_BGR2HSV); //Convert the captured frame from BGR to HSV
+		//cv::cvtColor(imgOriginal, imgHSV, cv::COLOR_BGR2HSV); //Convert the captured frame from BGR to HSV
 
 		// create grayscale image
 		cv::cvtColor(imgOriginal, imgGray, cv::COLOR_BGR2GRAY);
@@ -112,10 +126,9 @@ int main(int argc, char** argv )
 
 		// Object detection
 		cv::Mat imgDetect = cv::Mat::zeros(w, w, CV_8UC3);
-		detectObjects(
-			imgOriginal, imgGray, hierarchy, contoursOut);
-		
 		on_trackbar(0,imgDetect,0);
+		detectObjects(
+			imgGray, adaptThresBlock, adaptThresConst, hierarchy, contoursOut);
 		
 		// show thresholded image
 		cv::imshow("Detected Image", imgDetect); //show the thresholded image

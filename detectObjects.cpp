@@ -1,12 +1,13 @@
 #include <vector>
 #include "detectObjects.h"
 
-void detectObjects(cv::Mat& imgorig, cv::Mat& imgthres, std::vector<cv::Vec4i>& hierarchy, std::vector<std::vector<cv::Point>>& contoursOut){
+void detectObjects(cv::Mat& imgthres, int& blockS, int& const_, std::vector<cv::Vec4i>& hierarchy, std::vector<std::vector<cv::Point>>& contoursOut){
 
 	std::vector<std::vector<cv::Point>> contoursImg ;
 
 	// create binary from grayscale
-	cv::threshold(imgthres, imgthres,128,255, cv::THRESH_BINARY);
+	// cv::threshold(imgthres, imgthres,128,255, cv::THRESH_BINARY) ;
+	cv::adaptiveThreshold(imgthres, imgthres, 128, cv::ADAPTIVE_THRESH_GAUSSIAN_C, cv::THRESH_BINARY, blockS, const_) ;
 
 	cv::findContours(
 		imgthres, 
