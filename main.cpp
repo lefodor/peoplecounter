@@ -124,14 +124,28 @@ int main(int argc, char** argv )
 		// show video with tracking line
 		//cv::imshow("Original", imgOriginal); //show the original image
 
-		// Object detection
+		// Object detection - Contours
 		cv::Mat imgDetect = cv::Mat::zeros(w, w, CV_8UC3);
 		on_trackbar(0,imgDetect,0);
 		detectObjects(
 			imgGray, adaptThresBlock, adaptThresConst, hierarchy, contoursOut);
+
+		// Object detections - HOG
+		cv::Mat imgDetect2(imgOriginal) ;
+		cv::HOGDescriptor hog;
+		hog.setSVMDetector(cv::HOGDescriptor::getDefaultPeopleDetector());
+		std::vector<cv::Rect> detections ;
+		hog.detectMultiScale(imgDetect2, detections, 0, cv::Size(8,8), cv::Size(32,32), 1.2, 2 );
+
+		for (auto& detection : detections ){
+			cv::rectangle(imgDetect2, detection.tl(), detection.br(), cv::Scalar(255, 0, 0), 2 );
+		}
 		
 		// show thresholded image
-		cv::imshow("Detected Image", imgDetect); //show the thresholded image
+		//cv::imshow("Detected Image", imgDetect); //show the thresholded image
+
+		// show detected2 image
+		cv::imshow("Detected Image", imgDetect2); //show the thresholded image
 
 		// show grayscale image
 		//cv::imshow("Grayscale Image", imgGray); //show the thresholded image
