@@ -6,6 +6,8 @@
 #include <opencv2/imgproc.hpp>
 #include <opencv2/objdetect.hpp>
 #include <opencv2/xobjdetect.hpp>
+#include "opencv2/ml.hpp"
+#include "opencv2/videoio.hpp"
 
 #include "colorHSVtrackbar.h"
 #include "thresholding.h"
@@ -61,8 +63,23 @@ int main(int argc, char** argv )
 	// image processing variables
 	//cv::Mat imgHSV  ;      // HSV convert
 	//cv::Mat imgLines;      // empty image + tracking lines from colored object
-	cv::Mat imgGray   ;    // grayscale image
+
+	// setup trackbar - used for manual calibration ----------------------------------------
+	// Create trackbars in "Control" window
+	/*
+	cv::namedWindow( "contours", cv::WINDOW_AUTOSIZE );
+	cv::createTrackbar("Levels", "contours", &levels, 7); // levels
+	cv::createTrackbar("Threshold_Block", "contours", &adaptThresBlock, 11); // adaptive threshold blocksize
+	cv::createTrackbar("Threshold_Const", "contours", &adaptThresConst, 12); // adaptive threshold constant
+	*/
+
+	cv::Mat imgFromStream ;
 	cv::VideoCapture cap(0);
+
+	// load hog
+	cv::HOGDescriptor hog;
+	cv::String obj_det_filename = "../detectionoutput.yml" ;
+    hog.load( obj_det_filename );
 
 	if ( cap.isOpened() == false )
 	{
@@ -76,30 +93,11 @@ int main(int argc, char** argv )
 		std::cout << "Press ESC to end... " << std::endl;
 	}
 
-	// setup trackbar - used for manual calibration ----------------------------------------
-	// Create trackbars in "Control" window
-	cv::namedWindow( "contours", cv::WINDOW_AUTOSIZE );
-	cv::createTrackbar("Levels", "contours", &levels, 7); // levels
-	cv::createTrackbar("Threshold_Block", "contours", &adaptThresBlock, 11); // adaptive threshold blocksize
-	cv::createTrackbar("Threshold_Const", "contours", &adaptThresConst, 12); // adaptive threshold constant
-
-	/*
-	cv::createTrackbar("LowH", "contours", &iLowH, 179) ; // Hue (0 - 179)
-	cv::createTrackbar("HighH", "contours", &iHighH, 179);
-
-	cv::createTrackbar("LowS", "contours", &iLowS, 255); // Saturation (0 - 255)
-	cv::createTrackbar("HighS", "contours", &iHighS, 255);
-
-	cv::createTrackbar("LowV", "contours", &iLowV, 255); // Value (0 - 255)
-	cv::createTrackbar("HighV", "contours", &iHighV, 255);
-	*/
-
 	// start frame -------------------------------------------------------------------------
 	while ( true ) {
 
 		// get video
-		cv::Mat imgOriginal;
-		bool bSuccess = cap.read(imgOriginal); // read a new frame from video 
+		bool bSuccess = cap.read(imgFromStream); // read a new frame from video 
 
 		//Breaking the while loop at the end of the video
 		if ( bSuccess == false )
@@ -112,10 +110,10 @@ int main(int argc, char** argv )
 		//cv::cvtColor(imgOriginal, imgHSV, cv::COLOR_BGR2HSV); //Convert the captured frame from BGR to HSV
 
 		// create grayscale image
-		cv::cvtColor(imgOriginal, imgGray, cv::COLOR_BGR2GRAY);
+		//cv::cvtColor(imgFromStream, imgGray, cv::COLOR_BGR2GRAY);
 
 		//cv::Mat imgGray_histeq ;
-		equalizeHist(imgGray, imgGray);
+		//equalizeHist(imgGray, imgGray);
 
 		// create image with thresholding method v1
 		//cv::Mat imgThres = thresholdingv1(imgHSV, iLowH, iHighH, iLowS, iHighS, iLowV, iHighV);
@@ -123,38 +121,26 @@ int main(int argc, char** argv )
 
 		// show video with tracking line
 		//cv::imshow("Original", imgOriginal); //show the original image
-
+/*
 		// Object detection - Contours
 		cv::Mat imgDetect = cv::Mat::zeros(w, w, CV_8UC3);
 		on_trackbar(0,imgDetect,0);
 		detectObjects(
 			imgGray, adaptThresBlock, adaptThresConst, hierarchy, contoursOut);
-
+*/
 		// Object detections - HOG
-		cv::Mat imgDetect2(imgOriginal) ;
-		cv::HOGDescriptor hog;
-		hog.setSVMDetector(cv::HOGDescriptor::getDefaultPeopleDetector());
 		std::vector<cv::Rect> detections ;
-		hog.detectMultiScale(imgDetect2, detections, 0, cv::Size(8,8), cv::Size(32,32), 1.2, 2 );
+		hog.detectMultiScale(imgFromStream, detections, 0, cv::Size(8,8), cv::Size(32,32), 1.2, 2 );
 
 		for (auto& detection : detections ){
-			cv::rectangle(imgDetect2, detection.tl(), detection.br(), cv::Scalar(255, 0, 0), 2 );
+			cv::rectangle(imgFromStream, detection.tl(), detection.br(), cv::Scalar(255, 0, 0), 2 );
 		}
-		
-		// show thresholded image
-		//cv::imshow("Detected Image", imgDetect); //show the thresholded image
 
 		// show detected2 image
-		cv::imshow("Detected Image", imgDetect2); //show the thresholded image
-
-		// show grayscale image
-		//cv::imshow("Grayscale Image", imgGray); //show the thresholded image
+		cv::imshow("Detected Image", imgFromStream); //show the thresholded image
 
 		// exit -------------------------------------------------------------------------------
-		int comm = cv::waitKey(10);
-
-		// exit -------------------------------------------------------------------------------
-		if ( comm == 27 ) {
+		if ( cv::waitKey(1) == 27 ) {
 			std::cout << "Esc key is pressed by user. Stoppig the video" << std::endl;
 			break;
 		}

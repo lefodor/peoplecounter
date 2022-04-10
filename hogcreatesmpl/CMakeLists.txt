@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.16.3)
 
-project(peoplecounter)
+project(hogcreatesmpl)
 
 set(OpenCV_DIR "~/opencv/build")
 
@@ -15,16 +15,10 @@ if(${OPENCV_FOUND})
     MESSAGE(${OPENCV_LINK_LIBRARIES})
 endif()
 
-include_directories( ${OpenCV_INCLUDE_DIRS} )
+add_executable(${PROJECT_NAME} main.cpp)
 
-#add_library(build "")
-
-# add the colorHSVtrackbar library
-#add_subdirectory(colorHSVtrackbar)
-
-add_executable(${PROJECT_NAME} main.cpp thresholding.cpp detectObjects.cpp)
-target_link_libraries(peoplecounter PUBLIC ${OpenCV_LIBS})
-target_include_directories(peoplecounter PUBLIC 
+target_link_libraries(hogcreatesmpl PUBLIC ${OpenCV_LIBS})
+target_include_directories(hogcreatesmpl PUBLIC 
                             "${PROJECT_BINARY_DIR}" 
                             #"${PROJECT_SOURCE_DIR}/colorHSVtrackbar"
                             )
