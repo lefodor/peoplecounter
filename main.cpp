@@ -35,10 +35,9 @@ int iHighV = 255;
 
 // --- object detection
 std::vector<cv::Vec4i> hierarchy ;
-std::vector<std::vector<cv::Point>> contoursOut ;
 
 
-static void on_trackbar(int, cv::Mat& cnt_img, void*)
+static void on_trackbar(int, cv::Mat& cnt_img, std::vector<std::vector<cv::Point>> contoursOut, void*)
 {
     int _levels = levels - 3;
 
@@ -63,12 +62,9 @@ int main(int argc, char** argv )
 {
 
 	// image processing variables
-	//cv::Mat imgHSV  ;      // HSV convert
-	//cv::Mat imgLines;      // empty image + tracking lines from colored object
-
 	cv::Mat imgFromStream, imgBlur, imgCanny, imgDil, imgGray, imgAdapt;
-	cv::Mat kernel = cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(3,3)) ;
 	cv::VideoCapture cap(0);
+	cv::Mat kernel = cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(3,3)) ;
 
 	// setup trackbar - used for manual calibration ----------------------------------------
 	// Create trackbars in "Control" window
@@ -79,6 +75,9 @@ int main(int argc, char** argv )
 	cv::createTrackbar("HystMax", "contours", &hystMax, 100); // hysteresis min
 	cv::createTrackbar("Threshold_Block", "contours", &adaptThresBlock, 11); // adaptive threshold blocksize
 	cv::createTrackbar("Threshold_Const", "contours", &adaptThresConst, 12); // adaptive threshold constant
+
+	// contours
+	std::vector<std::vector<cv::Point>> contoursOut ;
 
 	// load hog
 	cv::HOGDescriptor hog;
@@ -122,17 +121,8 @@ int main(int argc, char** argv )
 		putText()
 */
 
-		// create grayscale image
-		//cv::cvtColor(imgFromStream, imgGray, cv::COLOR_BGR2GRAY);
-
 		//cv::Mat imgGray_histeq ;
 		//equalizeHist(imgGray, imgGray);
-
-		// color detection --------------------------------------------------------------
-		// create image with thresholding method v1
-		//cv::cvtColor(imgFromStream, imgHSV, cv::COLOR_BGR2HSV); //Convert the captured frame from BGR to HSV
-		//cv::Mat imgThres = thresholdingv1(imgHSV, iLowH, iHighH, iLowS, iHighS, iLowV, iHighV);
-		//cv::Mat imgThresv3 = thresholdingv3(imgHSV, iLowH, iHighH, iLowS, iHighS, iLowV, iHighV);
 
 		// image pre-process ------------------------------------------------------------
 		// for edge detection and contours
@@ -141,13 +131,13 @@ int main(int argc, char** argv )
 		cv::Canny(imgBlur, imgCanny, hystMin, hystMax) ;
 		cv::dilate(imgCanny, imgDil, kernel) ;
 
-		// create grayscale image
+		// adaptive thresholding
 		//cv::adaptiveThreshold(imgGray, imgAdapt, 128, cv::ADAPTIVE_THRESH_GAUSSIAN_C, cv::THRESH_BINARY, adaptThresBlock, adaptThresConst) ;
 
 		// object detection -------------------------------------------------------------
 		// Object detection - Contours
 		cv::Mat imgDetect = cv::Mat::zeros(w, w, CV_8UC3);
-		on_trackbar(0, imgDetect, 0);
+		on_trackbar(0, imgDetect, contoursOut, 0);
 		detectObjects(
 			imgDil, hierarchy, contoursOut);
 

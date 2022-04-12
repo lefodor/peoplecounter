@@ -19,13 +19,13 @@ void detectObjects(cv::Mat& img, std::vector<cv::Vec4i>& hierarchy, std::vector<
 
 	contoursOut.resize(contoursImg.size()) ;
 	for( size_t k = 0; k < contoursImg.size(); k++ ) {
-		/*
+		float perimeter = cv::arcLength(contoursImg[k], true) ;
         cv::approxPolyDP(
-			cv::Mat(contoursImg[k]), 
+			contoursImg[k], 
 			contoursOut[k], 
-			5, 
+			0.02*perimeter, 
 			true);
-		*/
-		contoursOut[k] = contoursImg[k] ; 
+		
+		//contoursOut[k] = contoursImg[k] ; 
 	}
 }
