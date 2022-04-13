@@ -14,7 +14,7 @@
 
 int main(int argc, char** argv )
 {
-	cv::Mat imgGray   ;    // grayscale image
+	cv::Mat imgFromStream, imgGray ;    // grayscale image
 	cv::VideoCapture cap(0);
 	cv::namedWindow( "video", cv::WINDOW_AUTOSIZE );
 
@@ -29,10 +29,9 @@ int main(int argc, char** argv )
 	while ( true ) {
 	
 		// get video
-		cv::Mat imgOriginal;
-		bool bSuccess = cap.read(imgOriginal); // read a new frame from video 
+		bool bSuccess = cap.read(imgFromStream); // read a new frame from video 
 
-		cv::resize(imgOriginal, imgOriginal, cv::Size(320, 240));
+		cv::resize(imgFromStream, imgFromStream, cv::Size(320, 240));
 
 		// create grayscale image
 		//cv::cvtColor(imgOriginal, imgGray, cv::COLOR_BGR2GRAY);
@@ -61,7 +60,7 @@ int main(int argc, char** argv )
 */
 
 		// show detected2 image
-		cv::imshow("video", imgOriginal); //show the thresholded image
+		cv::imshow("video", imgFromStream); //show the thresholded image
 
 		// exit -------------------------------------------------------------------------------
 		int comm = cv::waitKey(10);
@@ -74,13 +73,13 @@ int main(int argc, char** argv )
 		else if( comm == 113 ){ // q - positive
 			cnt_pos++ ;
 			std::string filename = "/home/woodrat/projects/szeuni/computervision/samples/hogpedestrians/pos/smp_" + std::to_string(cnt_pos) + ".png" ;
-			cv::imwrite(filename,imgOriginal) ;
+			cv::imwrite(filename,imgFromStream) ;
 			std::cout << "pos image saved " << std::to_string(cnt_pos)  << std::endl ;
 		}
 		else if( comm == 119 ){ // w - negative
 			cnt_neg++ ;
 			std::string filename = "/home/woodrat/projects/szeuni/computervision/samples/hogpedestrians/neg/smp_" + std::to_string(cnt_neg) + ".png" ;
-			cv::imwrite(filename,imgOriginal) ;
+			cv::imwrite(filename,imgFromStream) ;
 			std::cout << "neg image saved " << std::to_string(cnt_neg)  << std::endl ;
 		}
 	}
