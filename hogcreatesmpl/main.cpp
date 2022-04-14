@@ -72,13 +72,13 @@ int main(int argc, char** argv )
 		}
 		else if( comm == 113 ){ // q - positive
 			cnt_pos++ ;
-			std::string filename = "/home/woodrat/projects/szeuni/computervision/samples/hogpedestrians/pos/smp_" + std::to_string(cnt_pos) + ".png" ;
+			std::string filename = "/home/woodrat/projects/szeuni/computervision/peoplecounter/hogpedestrians/pos/smp_" + std::to_string(cnt_pos) + ".png" ;
 			cv::imwrite(filename,imgFromStream) ;
 			std::cout << "pos image saved " << std::to_string(cnt_pos)  << std::endl ;
 		}
 		else if( comm == 119 ){ // w - negative
 			cnt_neg++ ;
-			std::string filename = "/home/woodrat/projects/szeuni/computervision/samples/hogpedestrians/neg/smp_" + std::to_string(cnt_neg) + ".png" ;
+			std::string filename = "/home/woodrat/projects/szeuni/computervision/peoplecounter/hogpedestrians/neg/smp_" + std::to_string(cnt_neg) + ".png" ;
 			cv::imwrite(filename,imgFromStream) ;
 			std::cout << "neg image saved " << std::to_string(cnt_neg)  << std::endl ;
 		}
