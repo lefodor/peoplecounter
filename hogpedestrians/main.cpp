@@ -44,6 +44,7 @@ std::vector< float > get_svm_detector( const cv::Ptr< cv::ml::SVM >& svm )
 * Transposition of samples are made if needed.
 */
 
+// reads all images from dirname to vector img_list
 void load_images( const cv::String & dirname, std::vector< cv::Mat > & img_lst, bool showImages = false )
 {
     std::vector< cv::String > files;
@@ -67,6 +68,7 @@ void load_images( const cv::String & dirname, std::vector< cv::Mat > & img_lst, 
 
 // image greater than detector then take sample from image
 // otherwise take full image
+// sample_neg( full_neg_lst, neg_lst, pos_image_size ); // [64x128]
 void sample_neg( const std::vector< cv::Mat > & full_neg_lst, std::vector< cv::Mat > & neg_lst, const cv::Size & size )
 {
     cv::Rect box;
@@ -98,46 +100,45 @@ void computeHOGs( const cv::Size wsize, const std::vector< cv::Mat > & img_lst, 
     hog.winSize = wsize; //64x128
     cv::Mat gray;
     std::vector< float > descriptors;
-    for( size_t i = 0 ; i < img_lst.size(); i++ )
-    {
-        if ( img_lst[i].cols >= wsize.width && img_lst[i].rows >= wsize.height )
-        {
+    for( size_t i = 0 ; i < img_lst.size(); i++ ) {
+        if ( img_lst[i].cols >= wsize.width && img_lst[i].rows >= wsize.height ){
             // crop from middle of image
-            cv::Rect r = cv::Rect(( img_lst[i].cols - wsize.width ) / 2,
-                          ( img_lst[i].rows - wsize.height ) / 2,
-                          wsize.width,
-                          wsize.height);
-
-            //cv::cvtColor( img_lst[i](r), gray, cv::COLOR_BGR2GRAY );
+            cv::Rect r ;
+            r = cv::Rect(( img_lst[i].cols - wsize.width ) / 2,
+                        ( img_lst[i].rows - wsize.height ) / 2,
+                        wsize.width, wsize.height);
             gray = img_lst[i](r);
+        }
 
-            // no cropping
-            /*
-            cv::resize( img_lst[i], gray, wsize ); 
-            cv::cvtColor( gray, gray, cv::COLOR_BGR2GRAY );
-            */
+        //cv::cvtColor( img_lst[i](r), gray, cv::COLOR_BGR2GRAY );
+        gray = img_lst[i];
 
-            // £££ output images
-            /*
-            if( img_lst.size() > 100 ){
-                std::string filename = "/home/woodrat/projects/szeuni/computervision/samples/hogpedestrians/computeHOG/hogneg_" + std::to_string(i) + ".png" ;
-			    cv::imwrite(filename,gray) ;
-            }
-            else{
-                std::string filename = "/home/woodrat/projects/szeuni/computervision/samples/hogpedestrians/computeHOG/hogpos_" + std::to_string(i) + ".png" ;
-			    cv::imwrite(filename,gray) ;
-            }
-            */
+        // no cropping
+        /*
+        cv::resize( img_lst[i], gray, wsize ); 
+        cv::cvtColor( gray, gray, cv::COLOR_BGR2GRAY );
+        */
+
+        // £££ output images
+        /*
+        if( img_lst.size() > 100 ){
+        std::string filename = "/home/woodrat/projects/szeuni/computervision/samples/hogpedestrians/computeHOG/hogneg_" + std::to_string(i) + ".png" ;
+		cv::imwrite(filename,gray) ;
+        }
+        else{
+            std::string filename = "/home/woodrat/projects/szeuni/computervision/samples/hogpedestrians/computeHOG/hogpos_" + std::to_string(i) + ".png" ;
+			cv::imwrite(filename,gray) ;
+        }
+        */
             
+        hog.compute( gray, descriptors, cv::Size( 8, 8 ), cv::Size( 0, 0 ) );
+        gradient_lst.push_back( cv::Mat( descriptors ).clone() );
+
+        if ( use_flip )
+        {
+            flip( gray, gray, 1 );
             hog.compute( gray, descriptors, cv::Size( 8, 8 ), cv::Size( 0, 0 ) );
             gradient_lst.push_back( cv::Mat( descriptors ).clone() );
-
-            if ( use_flip )
-            {
-                flip( gray, gray, 1 );
-                hog.compute( gray, descriptors, cv::Size( 8, 8 ), cv::Size( 0, 0 ) );
-                gradient_lst.push_back( cv::Mat( descriptors ).clone() );
-            }
         }
     }
 }
@@ -241,11 +242,11 @@ int main(int argc, char** argv )
 
 	//CreatSmpls() ; // for creating samples
 
-	cv::String pos_dir = "/home/woodrat/projects/szeuni/computervision/peoplecounter/hogpedestrians/pos/";
+	cv::String pos_dir = "/home/woodrat/projects/szeuni/computervision/peoplecounter/hogpedestrians/pos_resized/";
     cv::String neg_dir = "/home/woodrat/projects/szeuni/computervision/peoplecounter/hogpedestrians/neg/";
     cv::String test_dir = "/home/woodrat/projects/szeuni/computervision/peoplecounter/hogpedestrians/test/";
-    cv::String videofilename = "sample6.jpg";
-    cv::String imgfilename = "sample4.jpg";
+    //cv::String videofilename = "sample6.jpg";
+    //cv::String imgfilename = "sample4.jpg";
 	cv::String obj_det_filename = "../detectionoutput.yml";
     int detector_width =64;//= 64 320 ; // parser.get< int >( "dw" );
     int detector_height =128;//= 128 240 ; // parser.get< int >( "dh" );
@@ -313,15 +314,34 @@ int main(int argc, char** argv )
     std::clog << "Training SVM...";
     cv::Ptr< cv::ml::SVM > svm = cv::ml::SVM::create();
     /* Default values to train SVM */
-    svm->setCoef0( 0.0 );
-    svm->setDegree( 3 );
+    svm->setCoef0( 0.0 ); // Parameter coef0 of a kernel function. For SVM::POLY or SVM::SIGMOID. Default value is 0. 
+    svm->setDegree( 3 ); // Parameter degree of a kernel function. For SVM::POLY. Default value is 0. 
+
+    // Termination criteria of the iterative SVM training procedure which solves a partial 
+    // case of constrained quadratic optimization problem. You can specify tolerance and/or 
+    // the maximum number of iterations. Default value is TermCriteria( TermCriteria::MAX_ITER + TermCriteria::EPS, 1000, FLT_EPSILON );
     svm->setTermCriteria( cv::TermCriteria(cv::TermCriteria::MAX_ITER + cv::TermCriteria::EPS, 1000, 1e-3 ) );
+    
+    // Parameter γ of a kernel function. For SVM::POLY, SVM::RBF, SVM::SIGMOID or SVM::CHI2. Default value is 1.
     svm->setGamma( 0 );
+
+    // Initialize with one of predefined kernels. See SVM::KernelTypes. 
+    // https://docs.opencv.org/3.4/d1/d2d/classcv_1_1ml_1_1SVM.html#aad7f1aaccced3c33bb256640910a0e56
     svm->setKernel( cv::ml::SVM::LINEAR );
+
+    // Parameter ν of a SVM optimization problem. For SVM::NU_SVC, SVM::ONE_CLASS or SVM::NU_SVR. Default value is 0.
     svm->setNu( 0.5 );
+
+    // Parameter ϵ of a SVM optimization problem. For SVM::EPS_SVR. Default value is 0. 
     svm->setP( 0.1 ); // for EPSILON_SVR, epsilon in loss function?
+
+    // Parameter C of a SVM optimization problem. For SVM::C_SVC, SVM::EPS_SVR or SVM::NU_SVR. Default value is 0.
     svm->setC( 0.01 ); // From paper, soft classifier
+
+    // Type of a SVM formulation. See SVM::Types. Default value is SVM::C_SVC. 
     svm->setType( cv::ml::SVM::EPS_SVR ); // C_SVC; // EPSILON_SVR; // may be also NU_SVR; // do regression task
+
+    // Trains the statistical model.
     svm->train( train_data, cv::ml::ROW_SAMPLE, labels );
     std::clog << "...[done]" << std::endl;
 
@@ -329,14 +349,14 @@ int main(int argc, char** argv )
     hog.winSize = pos_image_size;
     hog.setSVMDetector( get_svm_detector( svm ) );
     hog.save( obj_det_filename );
-
     //test_trained_detector( obj_det_filename, test_dir, videofilename );
 
-    
+/*    
     cv::Mat imgFromStream;
-    cv::VideoCapture cap(0);
+    //cv::VideoCapture cap(0);
+    cv::VideoCapture cap("../vid1.mp4");
     cv::namedWindow( "Reaper", cv::WINDOW_NORMAL );
-    //hog.load( obj_det_filename );
+    hog.load( obj_det_filename );
 
     // start frame -------------------------------------------------------------------------
 	while ( true ) {
@@ -344,18 +364,22 @@ int main(int argc, char** argv )
         bool bSuccess = cap.read(imgFromStream); // read a new frame from video 
 
 		//Breaking the while loop at the end of the video
+    
 		if ( bSuccess == false )
 		{
 			std::cout << "Video camera is disconnected" << std::endl;
 			break;
 		}
+        
 
         std::vector< cv::Rect > detections;
         std::vector< double > foundWeights;
         //hog.detectMultiScale( img, detections, foundWeights );
             // larger scale --> faster
             // lower scale --> slower and more false positive
+
         hog.detectMultiScale( imgFromStream, detections, 0, cv::Size(4,4), cv::Size(8,8), 2, 2 );
+        
         for ( size_t j = 0; j < detections.size(); j++ )
         {
             //cv::Scalar color = cv::Scalar( 0, foundWeights[j] * foundWeights[j] * 200, 0 );
@@ -364,13 +388,16 @@ int main(int argc, char** argv )
             //ResizeBox(detections[j]);
             cv::rectangle( imgFromStream, detections[j].tl(), detections[j].br(), color, 2) ; //img.cols / 400 + 1 );
         }
+    
+
         cv::imshow( "Reaper", imgFromStream );
+
         if( cv::waitKey( 1 ) == 27 )
         {
             return 0;
         }
 
     }
-
+*/
     return 0;
 }

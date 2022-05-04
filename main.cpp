@@ -68,13 +68,14 @@ int main(int argc, char** argv )
 
 	// setup trackbar - used for manual calibration ----------------------------------------
 	// Create trackbars in "Control" window
-
+/*
 	cv::namedWindow( "contours", cv::WINDOW_AUTOSIZE );
 	cv::createTrackbar("Levels", "contours", &levels, 7); // levels
 	cv::createTrackbar("HystMin", "contours", &hystMin, 50); // hysteresis min
 	cv::createTrackbar("HystMax", "contours", &hystMax, 100); // hysteresis min
 	cv::createTrackbar("Threshold_Block", "contours", &adaptThresBlock, 11); // adaptive threshold blocksize
 	cv::createTrackbar("Threshold_Const", "contours", &adaptThresConst, 12); // adaptive threshold constant
+*/
 
 	// contours
 	std::vector<std::vector<cv::Point>> contoursOut ;
@@ -135,6 +136,7 @@ int main(int argc, char** argv )
 		//cv::adaptiveThreshold(imgGray, imgAdapt, 128, cv::ADAPTIVE_THRESH_GAUSSIAN_C, cv::THRESH_BINARY, adaptThresBlock, adaptThresConst) ;
 
 		// object detection -------------------------------------------------------------
+/*
 		// Object detection - Contours
 		cv::Mat imgDetect = cv::Mat::zeros(w, w, CV_8UC3);
 		on_trackbar(0, imgDetect, contoursOut, 0);
@@ -143,8 +145,8 @@ int main(int argc, char** argv )
 
 		// show detected2 image
 		cv::imshow("Detected Image", imgDetect); //show the thresholded image
+*/
 
-/*
 		// Object detections - HOG
 		std::vector<cv::Rect> detections ;
 		hog.detectMultiScale(imgFromStream, detections, 0, cv::Size(8,8), cv::Size(32,32), 1.2, 2 );
@@ -153,8 +155,8 @@ int main(int argc, char** argv )
 			cv::rectangle(imgFromStream, detection.tl(), detection.br(), cv::Scalar(255, 0, 0), 2 );
 		}
 		// show detected2 image
-		cv::imshow("Detected Image", imgCanny); //show the thresholded image
-*/
+		cv::imshow("Detected Image", imgFromStream); //show the thresholded image
+
 
 		// exit -------------------------------------------------------------------------------
 		if ( cv::waitKey(1) == 27 ) {
