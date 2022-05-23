@@ -10,7 +10,7 @@ deadline: 2022-06-12
    loads positive and negative image files from specified folders and fits SVM model on HOG features
    output is detectionoutput.yml used by the other programs
 * hogtestimg
-   test fitted model on single image specified in 1st argument
+   test fitted model on single image specified in 1st argument  
    example command line call: $ ./hogtestimg "../testimg.jpeg"
 * hogteststream
    test fitted model with videos stream from webcam
