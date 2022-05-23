@@ -11,7 +11,7 @@ deadline: 2022-06-12
    output is detectionoutput.yml used by the other programs
 * hogtestimg
    test fitted model on single image specified in 1st argument, example command line call:  
-   $ ./hogtestimg "../testimg.jpeg"
+   $ ./hogtestimg "../raw_1.jpg"
 * hogteststream
    test fitted model with videos stream from webcam
 
