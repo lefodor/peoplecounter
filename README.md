@@ -10,8 +10,8 @@ deadline: 2022-06-12
    loads positive and negative image files from specified folders and fits SVM model on HOG features
    output is detectionoutput.yml used by the other programs
 * hogtestimg
-   test fitted model on single image specified in 1st argument  
-   example command line call: $ ./hogtestimg "../testimg.jpeg"
+   test fitted model on single image specified in 1st argument, example command line call:  
+   $ ./hogtestimg "../testimg.jpeg"
 * hogteststream
    test fitted model with videos stream from webcam
 
@@ -24,6 +24,6 @@ deadline: 2022-06-12
 4) Build
    $ cmake --build .
 5) Execute
-   $ ./hogpedestrians # modell fitting
-   $ ./hogptestimg <path to your image file> # test on single image file
-   $ ./hogpteststream  # test with videostream input
+   $ ./hogpedestrians # modell fitting  
+   $ ./hogptestimg <path to your image file> # test on single image file  
+   $ ./hogpteststream  # test with videostream input  
