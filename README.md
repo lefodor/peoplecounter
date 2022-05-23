@@ -32,3 +32,13 @@ deadline: 2022-06-12
  * ~~add counter for detections~~
  * treatment for overlapping detections
  * create demo video
+
+ # Resources
+ * http://vision.stanford.edu/teaching/cs231b_spring1213/papers/CVPR05_DalalTriggs.pdf
+ * https://learnopencv.com/histogram-of-oriented-gradients/
+ * https://pyimagesearch.com/2014/11/10/histogram-oriented-gradients-object-detection/
+ * https://docs.opencv.org/4.x/examples.html
+ * https://docs.opencv.org/4.x/d0/df8/samples_2cpp_2train_HOG_8cpp-example.html
+ * https://docs.opencv.org/4.x/d8/d61/samples_2tapi_2hog_8cpp-example.html
+ * https://www.youtube.com/watch?v=cvGEWBO0Vho
+ * https://www.kaggle.com/datasets/jeffreyhfuentes/lego-minifigures?select=test
