@@ -48,6 +48,12 @@ int main(int argc, char** argv )
             cv::Scalar color = cv::Scalar(0,255,0) ;
             cv::rectangle( imgFromStream, detections[j].tl(), detections[j].br(), color, 2) ; //img.cols / 400 + 1 );
         }
+
+        std::stringstream counter ;
+        counter << detections.size() ;
+        cv::putText(imgFromStream, 
+            "LEGO cnt: " + counter.str(), 
+            cv::Point(5, 50), cv::FONT_HERSHEY_SIMPLEX, 1., cv::Scalar(0, 255, 0), 2);
     
         cv::imshow( "Reaper", imgFromStream );
 
