@@ -43,15 +43,16 @@ std::vector< float > get_svm_detector( const cv::Ptr< cv::ml::SVM >& svm )
 * TrainData is a matrix of size (#samples x max(#cols,#rows) per samples), in 32FC1.
 * Transposition of samples are made if needed.
 */
-
 // reads all images from dirname to vector img_list
 void load_images( const cv::String & dirname, std::vector< cv::Mat > & img_lst, bool showImages = false )
 {
     std::vector< cv::String > files;
     cv::glob( dirname, files );
+
     for ( size_t i = 0; i < files.size(); ++i )
     {
         cv::Mat img = cv::imread( files[i] ); // load the image
+        //std::clog << "check " << files[i] << std::endl ; CV_Assert(img.cols==64 || img.rows==128) ;
         if ( img.empty() )
         {
             std::cout << files[i] << " is invalid!" << std::endl; // invalid image, skip it.
@@ -82,14 +83,12 @@ void sample_neg( const std::vector< cv::Mat > & full_neg_lst, std::vector< cv::M
             box.y = rand() % ( full_neg_lst[i].rows - box.height );//240-128=[0,112]
             cv::Mat roi = full_neg_lst[i]( box );
             neg_lst.push_back( roi.clone() );
-            //std::string filename = "/home/woodrat/projects/szeuni/computervision/samples/hogpedestrians/sample_neg/smpneg_" + std::to_string(i) + ".png" ;
-			//cv::imwrite(filename,roi) ;
         }
-        // £££ save image with same size as detector
-        /*else{
+        // save image with same size as detector
+        else{
             neg_lst.push_back( full_neg_lst[i].clone() );
         }
-        */
+        
 }
 
 //computeHOGs( pos_image_size, pos_lst, gradient_lst, false );
@@ -112,24 +111,6 @@ void computeHOGs( const cv::Size wsize, const std::vector< cv::Mat > & img_lst, 
 
         //cv::cvtColor( img_lst[i](r), gray, cv::COLOR_BGR2GRAY );
         gray = img_lst[i];
-
-        // no cropping
-        /*
-        cv::resize( img_lst[i], gray, wsize ); 
-        cv::cvtColor( gray, gray, cv::COLOR_BGR2GRAY );
-        */
-
-        // £££ output images
-        /*
-        if( img_lst.size() > 100 ){
-        std::string filename = "/home/woodrat/projects/szeuni/computervision/samples/hogpedestrians/computeHOG/hogneg_" + std::to_string(i) + ".png" ;
-		cv::imwrite(filename,gray) ;
-        }
-        else{
-            std::string filename = "/home/woodrat/projects/szeuni/computervision/samples/hogpedestrians/computeHOG/hogpos_" + std::to_string(i) + ".png" ;
-			cv::imwrite(filename,gray) ;
-        }
-        */
             
         hog.compute( gray, descriptors, cv::Size( 8, 8 ), cv::Size( 0, 0 ) );
         gradient_lst.push_back( cv::Mat( descriptors ).clone() );
@@ -143,13 +124,6 @@ void computeHOGs( const cv::Size wsize, const std::vector< cv::Mat > & img_lst, 
     }
 }
 
-/*
-* Convert training/testing set to be used by OpenCV Machine Learning algorithms.
-* TrainData is a matrix of size (#samples x max(#cols,#rows) per samples), in 32FC1.
-* Transposition of samples are made if needed.
-*/
-
-//cv::Mat train_data;
 //convert_to_ml( gradient_lst, train_data );
 void convert_to_ml( const std::vector< cv::Mat > & train_samples, cv::Mat& trainData )
 {
@@ -163,8 +137,8 @@ void convert_to_ml( const std::vector< cv::Mat > & train_samples, cv::Mat& train
         CV_Assert( train_samples[i].cols == 1 || train_samples[i].rows == 1 );
         if( train_samples[i].cols == 1 )
         {
-            transpose( train_samples[i], tmp );
-            tmp.copyTo( trainData.row( (int)i ) );
+            transpose( train_samples[i], tmp ); 
+            tmp.copyTo( trainData.row( (int)i ) ); 
         }
         else if( train_samples[i].rows == 1 )
         {
@@ -173,80 +147,14 @@ void convert_to_ml( const std::vector< cv::Mat > & train_samples, cv::Mat& train
     }
 }
 
-void test_trained_detector( cv::String obj_det_filename, cv::String test_dir, cv::String videofilename )
-{
-    std::cout << "Testing trained detector..." << std::endl;
-    cv::HOGDescriptor hog;
-    hog.load( obj_det_filename );
-    std::vector< cv::String > files;
-    cv::glob( test_dir, files );
-    int delay = 0;
-    cv::VideoCapture cap;
-    if ( videofilename != "" )
-    {
-        if ( videofilename.size() == 1 && isdigit( videofilename[0] ) )
-            cap.open( videofilename[0] - '0' );
-        else
-            cap.open( videofilename );
-    }
-    obj_det_filename = "testing " + obj_det_filename;
-    cv::namedWindow( obj_det_filename, cv::WINDOW_NORMAL );
-    for( size_t i=0;; i++ )
-    {
-        cv::Mat img;
-        if ( cap.isOpened() )
-        {
-            cap >> img;
-            delay = 1;
-        }
-        else if( i < files.size() )
-        {
-            img = cv::imread( files[i] );
-        }
-        if ( img.empty() )
-        {
-            return;
-        }
-
-        // save original
-        //cv::Mat imgOrig = img ;
-
-        std::vector< cv::Rect > detections;
-        std::vector< double > foundWeights;
-        //hog.detectMultiScale( img, detections, foundWeights );
-            // larger scale --> faster
-            // lower scale --> slower and more false positive
-        hog.detectMultiScale( img, detections, 0, cv::Size(4,4), cv::Size(8,8), 1.1, 2 );
-        for ( size_t j = 0; j < detections.size(); j++ )
-        {
-            //cv::Scalar color = cv::Scalar( 0, foundWeights[j] * foundWeights[j] * 200, 0 );
-            cv::Scalar color = cv::Scalar(255,0,0) ;
-            //rectangle( img, detections[j], color, img.cols / 400 + 1 );
-            //ResizeBox(detections[j]);
-            cv::rectangle( img, detections[j].tl(), detections[j].br(), color, 2) ; //img.cols / 400 + 1 );
-        }
-        cv::imshow( obj_det_filename, img );
-        if( cv::waitKey( delay ) == 27 )
-        {
-            return;
-        }
-    }
-}
-
 int main(int argc, char** argv )
 {
-	//cv::Mat imgOriginal = cv::imread("/home/woodrat/projects/szeuni/computervision/samples/hogpedestrians/sample2.jpeg",1) ;
-    //cv::Mat imgOriginal = cv::imread("/home/woodrat/projects/szeuni/computervision/samples/hogpedestrians/sample2.jpeg",1) ;
-	//cv::resize(imgOriginal, imgOriginal, cv::Size(640, 480));
-	//cv::resize(imgOriginal, imgOriginal, cv::Size(0,0), .5, .5);
+	cv::String pos_dir = "/home/woodrat/projects/szeuni/computervision/peoplecounter/hogpedestrians/pos_resized_20220512/";
+    cv::String neg_dir = "/home/woodrat/projects/szeuni/computervision/peoplecounter/hogpedestrians/neg_resized_20220522/";
+    
+    // testing separate code
+    //cv::String test_dir = "/home/woodrat/projects/szeuni/computervision/peoplecounter/hogpedestrians/test/";
 
-	//CreatSmpls() ; // for creating samples
-
-	cv::String pos_dir = "/home/woodrat/projects/szeuni/computervision/peoplecounter/hogpedestrians/pos_resized/";
-    cv::String neg_dir = "/home/woodrat/projects/szeuni/computervision/peoplecounter/hogpedestrians/neg/";
-    cv::String test_dir = "/home/woodrat/projects/szeuni/computervision/peoplecounter/hogpedestrians/test/";
-    //cv::String videofilename = "sample6.jpg";
-    //cv::String imgfilename = "sample4.jpg";
 	cv::String obj_det_filename = "../detectionoutput.yml";
     int detector_width =64;//= 64 320 ; // parser.get< int >( "dw" );
     int detector_height =128;//= 128 240 ; // parser.get< int >( "dh" );
@@ -254,6 +162,7 @@ int main(int argc, char** argv )
     std::vector< cv::Mat > pos_lst, full_neg_lst, neg_lst, gradient_lst;
     std::vector< int > labels;
 
+    // ----------------------------------------- positive image processing START
 	std::clog << "Positive images are being loaded..." ;
     load_images( pos_dir, pos_lst, false );
     if ( pos_lst.size() > 0 )
@@ -266,8 +175,7 @@ int main(int argc, char** argv )
         return 1;
     }
 
-    cv::Size pos_image_size ; //= pos_lst[0].size();
-    //std::cout << pos_image_size << std::endl ;
+    cv::Size pos_image_size ; 
 
     if ( detector_width && detector_height )
     {
@@ -287,7 +195,9 @@ int main(int argc, char** argv )
     }
 
     std::cout << "pos_image_size: " << pos_image_size << std::endl ;
+    // ----------------------------------------- positive image processing DONE
 
+    // ----------------------------------------- negative image processing START
     std::clog << "Negative images are being loaded...";
     load_images( neg_dir, full_neg_lst, false );
     std::clog << "...[done] " << full_neg_lst.size() << " files." << std::endl;
@@ -295,21 +205,28 @@ int main(int argc, char** argv )
     std::clog << "Negative images are being processed...";
     sample_neg( full_neg_lst, neg_lst, pos_image_size ); // [64x128]
     std::clog << "...[done] " << neg_lst.size() << " files." << std::endl;
+    // ----------------------------------------- negative image processing DONE
 
+    // ----------------------------------------- positive image HOG START
     std::clog << "Histogram of Gradients are being calculated for positive images...";
     computeHOGs( pos_image_size, pos_lst, gradient_lst, false );
     size_t positive_count = gradient_lst.size();
     labels.assign( positive_count, +1 );
     std::clog << "...[done] ( positive images count : " << positive_count << " )" << std::endl;
+    // ----------------------------------------- positive image HOG DONE
 
+    // ----------------------------------------- negative image HOG START
     std::clog << "Histogram of Gradients are being calculated for negative images...";
     computeHOGs( pos_image_size, neg_lst, gradient_lst, false );
     size_t negative_count = gradient_lst.size() - positive_count;
     labels.insert( labels.end(), negative_count, -1 );
     CV_Assert( positive_count < labels.size() ); // returns error if expression is false
     std::clog << "...[done] ( negative images count : " << negative_count << " )" << std::endl;
+    // ----------------------------------------- negative image HOG DONE
     
+    // ----------------------------------------- svm model train START
 	cv::Mat train_data;
+    std::clog << "convert_to_ml" << std::endl ;
     convert_to_ml( gradient_lst, train_data );
     std::clog << "Training SVM...";
     cv::Ptr< cv::ml::SVM > svm = cv::ml::SVM::create();
@@ -344,60 +261,12 @@ int main(int argc, char** argv )
     // Trains the statistical model.
     svm->train( train_data, cv::ml::ROW_SAMPLE, labels );
     std::clog << "...[done]" << std::endl;
+    // ----------------------------------------- svm model train DONE
 
     cv::HOGDescriptor hog;
     hog.winSize = pos_image_size;
     hog.setSVMDetector( get_svm_detector( svm ) );
     hog.save( obj_det_filename );
-    //test_trained_detector( obj_det_filename, test_dir, videofilename );
 
-/*    
-    cv::Mat imgFromStream;
-    //cv::VideoCapture cap(0);
-    cv::VideoCapture cap("../vid1.mp4");
-    cv::namedWindow( "Reaper", cv::WINDOW_NORMAL );
-    hog.load( obj_det_filename );
-
-    // start frame -------------------------------------------------------------------------
-	while ( true ) {
-        
-        bool bSuccess = cap.read(imgFromStream); // read a new frame from video 
-
-		//Breaking the while loop at the end of the video
-    
-		if ( bSuccess == false )
-		{
-			std::cout << "Video camera is disconnected" << std::endl;
-			break;
-		}
-        
-
-        std::vector< cv::Rect > detections;
-        std::vector< double > foundWeights;
-        //hog.detectMultiScale( img, detections, foundWeights );
-            // larger scale --> faster
-            // lower scale --> slower and more false positive
-
-        hog.detectMultiScale( imgFromStream, detections, 0, cv::Size(4,4), cv::Size(8,8), 2, 2 );
-        
-        for ( size_t j = 0; j < detections.size(); j++ )
-        {
-            //cv::Scalar color = cv::Scalar( 0, foundWeights[j] * foundWeights[j] * 200, 0 );
-            cv::Scalar color = cv::Scalar(255,0,0) ;
-            //rectangle( img, detections[j], color, img.cols / 400 + 1 );
-            //ResizeBox(detections[j]);
-            cv::rectangle( imgFromStream, detections[j].tl(), detections[j].br(), color, 2) ; //img.cols / 400 + 1 );
-        }
-    
-
-        cv::imshow( "Reaper", imgFromStream );
-
-        if( cv::waitKey( 1 ) == 27 )
-        {
-            return 0;
-        }
-
-    }
-*/
     return 0;
 }

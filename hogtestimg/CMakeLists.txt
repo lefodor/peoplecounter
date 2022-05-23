@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.16.3)
 
-project(hogtest)
+project(hogtestimg)
 
 set(OpenCV_DIR "~/opencv/build")
 
@@ -17,8 +17,8 @@ endif()
 
 add_executable(${PROJECT_NAME} main.cpp)
 
-target_link_libraries(hogtest PUBLIC ${OpenCV_LIBS})
-target_include_directories(hogtest PUBLIC 
+target_link_libraries(hogtestimg PUBLIC ${OpenCV_LIBS})
+target_include_directories(hogtestimg PUBLIC 
                             "${PROJECT_BINARY_DIR}" 
                             #"${PROJECT_SOURCE_DIR}/colorHSVtrackbar"
                             )
