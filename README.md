@@ -29,6 +29,6 @@ deadline: 2022-06-12
    $ ./hogpteststream  # test with videostream input  
 
 # ToDo:
- * add counter for detections
+ * ~~add counter for detections~~
  * treatment for overlapping detections
  * create demo video
