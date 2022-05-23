@@ -27,3 +27,8 @@ deadline: 2022-06-12
    $ ./hogpedestrians # modell fitting  
    $ ./hogptestimg <path to your image file> # test on single image file  
    $ ./hogpteststream  # test with videostream input  
+
+# ToDo:
+ * add counter for detections
+ * treatment for overlapping detections
+ * create demo video
