@@ -59,6 +59,7 @@ int main(int argc, char** argv )
     cv::imshow( "Reaper", imgFromStream );
 
     if( cv::waitKey() == 27 ){
+        cv::destroyAllWindows();
         return 0;
     }
 

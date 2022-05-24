@@ -84,7 +84,7 @@ int main(int argc, char** argv )
 
         if( cv::waitKey( 1 ) == 27 )
         {
-            return 0;
+            break;
         }
 
     }
