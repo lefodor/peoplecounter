@@ -31,7 +31,7 @@ deadline: 2022-06-12
 # ToDo:
  * ~~add counter for detections~~
  * treatment for overlapping detections
- * create demo video
+ * ~~create demo video~~
 
  # Resources
  * http://vision.stanford.edu/teaching/cs231b_spring1213/papers/CVPR05_DalalTriggs.pdf
