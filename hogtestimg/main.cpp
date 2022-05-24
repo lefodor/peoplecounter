@@ -53,7 +53,7 @@ int main(int argc, char** argv )
     std::stringstream counter ;
     counter << detections.size() ;
     cv::putText(imgFromStream, 
-        "LEGO cnt: " + counter.str(), 
+        "LEGO: " + counter.str(), 
         cv::Point(5, 50), cv::FONT_HERSHEY_SIMPLEX, 1., cv::Scalar(0, 255, 0), 2);
     
     cv::imshow( "Reaper", imgFromStream );

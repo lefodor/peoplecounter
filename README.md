@@ -40,5 +40,7 @@ deadline: 2022-06-12
  * https://docs.opencv.org/4.x/examples.html
  * https://docs.opencv.org/4.x/d0/df8/samples_2cpp_2train_HOG_8cpp-example.html
  * https://docs.opencv.org/4.x/d8/d61/samples_2tapi_2hog_8cpp-example.html
+ * https://learnopencv.com/read-write-and-display-a-video-using-opencv-cpp-python/
+ * https://docs.opencv.org/4.x/d7/d9e/tutorial_video_write.html
  * https://www.youtube.com/watch?v=cvGEWBO0Vho
  * https://www.kaggle.com/datasets/jeffreyhfuentes/lego-minifigures?select=test
