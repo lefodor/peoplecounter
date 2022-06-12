@@ -33,7 +33,7 @@ deadline: 2022-06-12
  * treatment for overlapping detections
  * ~~create demo video~~
  * detector dynamic parametrization
- * validation method
+ * ~~validation method~~
 
  # Resources
  * http://vision.stanford.edu/teaching/cs231b_spring1213/papers/CVPR05_DalalTriggs.pdf
