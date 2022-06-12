@@ -149,7 +149,7 @@ void convert_to_ml( const std::vector< cv::Mat > & train_samples, cv::Mat& train
 
 int main(int argc, char** argv )
 {
-	cv::String pos_dir = "/home/woodrat/projects/szeuni/computervision/peoplecounter/hogpedestrians/pos_resized_20220512/";
+	cv::String pos_dir = "/home/woodrat/projects/szeuni/computervision/peoplecounter/hogpedestrians/pos_resized_20220604/";
     cv::String neg_dir = "/home/woodrat/projects/szeuni/computervision/peoplecounter/hogpedestrians/neg_resized_20220522/";
     
     // testing separate code
